@@ -5,7 +5,7 @@ function logMessage(value: string | number) {
     if (typeof value === 'number') {
         // value. <= 넘버에 활용할 수 있는 api,속성 목록이 뜬다
     } else {
-        value.toString();
+        value.toString();   // string에 대한 api,속성 목록
     }
     throw new TypeError('value must be string or number');
 }
@@ -44,7 +44,7 @@ askSomeone({ name: 'kara', age: 22 });
 askSomeone({ name: 'hank', skill: 'java', age: 50 });
 
 // 인터섹션 
-askAnyone({ name: 'corner', skill: 'react' }); // err
+askAnyone({ name: 'corner', skill: 'react' }); // err : age가 없어서
 askAnyone({ name: 'markus', skill: 'spring', age: 30 });
 
 

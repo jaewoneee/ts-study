@@ -74,7 +74,7 @@ class AddressBook {
     );
   }
 
-  addContact(contact): void {
+  addContact(contact:Contact): void {
     this.contacts.push(contact);
   }
 

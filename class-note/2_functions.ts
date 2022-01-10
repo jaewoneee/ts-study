@@ -20,7 +20,7 @@ divideNum(20, 10, 5);   // 불필요한 인자의 존재를 인식하는 ts쨩
 // 함수의 옵셔널 파라미터
 // 있어도, 없어도 되는 파라미터의 뒤에 '?' 를 붙이면 된다
 function log(a: string, b?: string, c?: number) {
-    
+
 }
 log('hello WOrld');
 // log(3);  에러 : a 타입은 반드시 들어가야 하니깐
