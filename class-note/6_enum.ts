@@ -10,9 +10,10 @@ console.log(myShoes); // 0
 
 // 2.문자형 이넘
 enum Fruit{
-    banana = "바나나",
-    apple = "사과",
+    banana = "yellow",
+    apple = "red",
 };
+var item = Fruit.banana; // "yellow"
 
 // 예제
 enum Answer {
