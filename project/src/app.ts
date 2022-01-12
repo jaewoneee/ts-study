@@ -1,23 +1,29 @@
 // utils
-function $(selector) {
+function $(selector: string) {
   return document.querySelector(selector);
 }
-function getUnixTimestamp(date) {
+function getUnixTimestamp(date: Date) {
   return new Date(date).getTime();
 }
-
 // DOM
-const confirmedTotal = $(".confirmed-total");
-const deathsTotal = $(".deaths");
-const recoveredTotal = $(".recovered");
-const lastUpdatedTime = $(".last-updated-time");
+// var a : Element | HTMLElement | HTMLParagraphElement
+const confirmedTotal = $(".confirmed-total") as HTMLSpanElement;
+const deathsTotal = $(".deaths") as HTMLParagraphElement;
+// ** const deathsTotal:HtmlParagraphElement=$(".deaths")는 안되는 이유
+// 2번줄의 function 거치면 반환되는 값은 'Element라는 타입이다'라는 결과가 적용됨. 그래서
+// const deathsTotal = $(".deaths") : $(".deaths")는 Element 타입이라고 먼저 추론이 되어 있는데
+// deathsTotal 이라는 상수(변수)는 어쩌구 타입입니다 라고 지정하면 호환 불가 상태가 되므로,
+// 먼저 결과가 적용되어 있는 값에다가 타입 단언을 선언하여 특정 타입으로 다시 지정해 준 것.
+
+const recoveredTotal = $(".recovered") as HTMLParagraphElement;
+const lastUpdatedTime = $(".last-updated-time") as HTMLParagraphElement;
 const rankList = $(".rank-list");
 const deathsList = $(".deaths-list");
 const recoveredList = $(".recovered-list");
 const deathSpinner = createSpinnerElement("deaths-spinner");
 const recoveredSpinner = createSpinnerElement("recovered-spinner");
 
-function createSpinnerElement(id) {
+function createSpinnerElement(id: string) {
   const wrapperDiv = document.createElement("div");
   wrapperDiv.setAttribute("id", id);
   wrapperDiv.setAttribute(
@@ -34,16 +40,21 @@ function createSpinnerElement(id) {
 
 // state
 let isDeathLoading = false;
-let isRecoveredLoading = false;
+const isRecoveredLoading = false;
 
 // api
-function fetchCovidSummary() {
+function fetchCovidSummary(): Promise<> {
   const url = "https://api.covid19api.com/summary";
   return axios.get(url);
 }
+enum CovidStatus {
+  Confirmed = "confirmed",
+  Recovered = "recovered",
+  Deaths = "deaths",
+}
 
-function fetchCountryInfo(countryCode, status) {
-  // params: confirmed, recovered, deaths
+function fetchCountryInfo(countryCode: string, status: CovidStatus): Promise<> {
+  // status params: confirmed, recovered, deaths
   const url = `https://api.covid19api.com/country/${countryCode}/status/${status}`;
   return axios.get(url);
 }
@@ -77,14 +88,17 @@ async function handleListClick(event) {
   clearRecoveredList();
   startLoadingAnimation();
   isDeathLoading = true;
-  const { data: deathResponse } = await fetchCountryInfo(selectedId, "deaths");
+  const { data: deathResponse } = await fetchCountryInfo(
+    selectedId,
+    CovidStatus.Deaths
+  );
   const { data: recoveredResponse } = await fetchCountryInfo(
     selectedId,
-    "recovered"
+    CovidStatus.Recovered
   );
   const { data: confirmedResponse } = await fetchCountryInfo(
     selectedId,
-    "confirmed"
+    CovidStatus.Confirmed
   );
   endLoadingAnimation();
   setDeathsList(deathResponse);
@@ -99,7 +113,7 @@ function setDeathsList(data) {
   const sorted = data.sort(
     (a, b) => getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
   );
-  sorted.forEach((value) => {
+  sorted.forEach(value => {
     const li = document.createElement("li");
     li.setAttribute("class", "list-item-b flex align-center");
     const span = document.createElement("span");
@@ -125,7 +139,7 @@ function setRecoveredList(data) {
   const sorted = data.sort(
     (a, b) => getUnixTimestamp(b.Date) - getUnixTimestamp(a.Date)
   );
-  sorted.forEach((value) => {
+  sorted.forEach(value => {
     const li = document.createElement("li");
     li.setAttribute("class", "list-item-b flex align-center");
     const span = document.createElement("span");
@@ -167,7 +181,7 @@ async function setupData() {
 }
 
 function renderChart(data, labels) {
-  var ctx = $("#lineChart").getContext("2d");
+  const ctx = $("#lineChart").getContext("2d");
   Chart.defaults.color = "#f5eaea";
   new Chart(ctx, {
     type: "line",
@@ -187,10 +201,10 @@ function renderChart(data, labels) {
 }
 
 function setChartData(data) {
-  const chartData = data.slice(-14).map((value) => value.Cases);
+  const chartData = data.slice(-14).map(value => value.Cases);
   const chartLabel = data
     .slice(-14)
-    .map((value) => new Date(value.Date).toLocaleDateString().slice(5, -1));
+    .map(value => new Date(value.Date).toLocaleDateString().slice(5, -1));
   renderChart(chartData, chartLabel);
 }
 
@@ -219,7 +233,7 @@ function setCountryRanksByConfirmedCases(data) {
   const sorted = data.Countries.sort(
     (a, b) => b.TotalConfirmed - a.TotalConfirmed
   );
-  sorted.forEach((value) => {
+  sorted.forEach(value => {
     const li = document.createElement("li");
     li.setAttribute("class", "list-item flex align-center");
     li.setAttribute("id", value.Slug);
