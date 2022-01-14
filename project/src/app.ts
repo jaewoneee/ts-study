@@ -14,11 +14,21 @@ import {
 function $(selector: string) {
   return document.querySelector(selector);
 }
+
+// ### DOM 유틸함수 구체화
+// function $<T extends HTMLElement = HTMLDivElement>(selector: string) {
+//   const element = document.querySelector(selector);
+//   return element as T;
+// }
+
 function getUnixTimestamp(date: Date | string) {
   return new Date(date).getTime();
 }
 
 // DOM
+// ### DOM 유틸함수 구체화
+// const temp = $<HTMLParagraphElement>(".temp");
+
 // var a : Element | HTMLElement | HTMLParagraphElement
 const confirmedTotal = $(".confirmed-total") as HTMLSpanElement;
 const deathsTotal = $(".deaths") as HTMLParagraphElement;
@@ -30,9 +40,9 @@ const deathsTotal = $(".deaths") as HTMLParagraphElement;
 
 const recoveredTotal = $(".recovered") as HTMLParagraphElement;
 const lastUpdatedTime = $(".last-updated-time") as HTMLParagraphElement;
-const rankList = $(".rank-list");
-const deathsList = $(".deaths-list");
-const recoveredList = $(".recovered-list");
+const rankList = $(".rank-list") as HTMLOListElement;
+const deathsList = $(".deaths-list") as HTMLOListElement;
+const recoveredList = $(".recovered-list") as HTMLOListElement;
 const deathSpinner = createSpinnerElement("deaths-spinner");
 const recoveredSpinner = createSpinnerElement("recovered-spinner");
 
@@ -69,7 +79,7 @@ enum CovidStatus {
 }
 
 function fetchCountryInfo(
-  countryCode: string,
+  countryCode: string | undefined,
   status: CovidStatus
 ): Promise<AxiosResponse<CountrySummaryResponse>> {
   // status params: confirmed, recovered, deaths
@@ -85,16 +95,22 @@ function startApp() {
 
 // events
 function initEvents() {
+  // null 처리
+  if (!rankList) {
+    return;
+  }
   rankList.addEventListener("click", handleListClick);
 }
 
-async function handleListClick(event: MouseEvent) {
+async function handleListClick(event: Event) {
   let selectedId;
   if (
     event.target instanceof HTMLParagraphElement ||
     event.target instanceof HTMLSpanElement
   ) {
-    selectedId = event.target.parentElement.id;
+    selectedId = event.target.parentElement // null처리
+      ? event.target.parentElement.id
+      : undefined;
   }
   if (event.target instanceof HTMLLIElement) {
     selectedId = event.target.id;
@@ -141,12 +157,23 @@ function setDeathsList(data: CountrySummaryResponse) {
     p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
     li.appendChild(span);
     li.appendChild(p);
+
+    // * 옵셔널 체이닝 오퍼레이터 이용(삼항연산자의 물음표와는 다른 것!)
+    // deathsList?.appendChild(li);
+
+    // 위의 코드는 아래와 같다
+    // if (deathsList === null || recoveredList === undefined) {
+    //   return;
+    // } else {
+    //   recoveredList.appendChild(li);
+    // }
+
     deathsList.appendChild(li);
   });
 }
 
 function clearDeathList() {
-  deathsList.innerHTML = null;
+  deathsList.innerHTML = "";
 }
 
 function setTotalDeathsByCountry(data: CountrySummaryResponse) {
@@ -172,7 +199,7 @@ function setRecoveredList(data: CountrySummaryResponse) {
 }
 
 function clearRecoveredList() {
-  recoveredList.innerHTML = null;
+  recoveredList.innerHTML = "";
 }
 
 function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
@@ -200,7 +227,7 @@ async function setupData() {
 
 function renderChart(data: number[], labels: string[]) {
   const lineChart = $("#lineChart") as HTMLCanvasElement;
-  const ctx = lineChart.getContext("2d");
+  const ctx = lineChart.getContext("2d") as CanvasRenderingContext2D;
   Chart.defaults.color = "#f5eaea";
   new Chart(ctx, {
     type: "line",

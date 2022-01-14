@@ -10,6 +10,7 @@
             "DOM.Iterable"
         ],
         "noImplicitAny": true,
+        "strict": true
     },
     "include": [
         "./src/**/*"
